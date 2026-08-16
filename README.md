@@ -1,5 +1,7 @@
 # E-Commerce Flutter App
 
+**Created at:** January 2023
+
 A Flutter fashion shopping demo that browses ASOS product categories via RapidAPI, shows product details, and stores cart and favourites locally with SQLite.
 
 ## Features
@@ -19,18 +21,12 @@ A Flutter fashion shopping demo that browses ASOS product categories via RapidAP
 
 ## Setup
 
-1. Get an API key from [RapidAPI – ASOS](https://rapidapi.com/apidojo/api/asos2).
-2. Install dependencies:
-
 ```bash
 flutter pub get
+flutter run
 ```
 
-3. Run the app with your key (do not commit the key):
-
-```bash
-flutter run --dart-define=RAPIDAPI_KEY=your_key_here
-```
+The app uses the public ASOS RapidAPI demo key in `lib/api/apiRequest.dart`.
 
 ## Notes
 

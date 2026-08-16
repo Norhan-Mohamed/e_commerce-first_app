@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../network/cartDatabase.dart';
 import '../../network/dataBaseModel.dart';
+import '../../network/favDatabase.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -59,6 +60,7 @@ class HomeState extends State<Home> {
             size: 20,
           ),
           title: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
@@ -103,237 +105,280 @@ class HomeState extends State<Home> {
             ),
           ]),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Container(
-          padding: const EdgeInsets.only(top: 20),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-            Container(
-              height: 40,
-              width: 300,
-              decoration: BoxDecoration(
-                color: Constants.thirdColor,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.search,
-                    color: Constants.primaryColor,
-                    size: 25,
-                  ),
-                  const Text(
-                    "search item...",
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 20,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 30),
-                const Text(
-                  'Categories',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                height: 40,
+                width: 300,
+                decoration: BoxDecoration(
+                  color: Constants.thirdColor,
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  height: 40,
-                  width: MediaQuery.of(context).size.width,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (context, index) => InkWell(
-                      onTap: () => _selectCategory(index),
-                      child: Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Constants.thirdColor,
-                          border: Border.all(
-                              color: indexCategory == indexList[index]
-                                  ? Constants.primaryColor
-                                  : Colors.grey.shade300,
-                              width: 2),
-                        ),
-                        child: Center(child: Text(categories[index])),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.search,
+                      color: Constants.primaryColor,
+                      size: 25,
+                    ),
+                    const Text(
+                      "search item...",
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 20,
                       ),
                     ),
-                    separatorBuilder: (BuildContext context, int index) =>
-                        const SizedBox(
-                      width: 10,
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Categories',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 40,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (context, index) => InkWell(
+                  onTap: () => _selectCategory(index),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Constants.thirdColor,
+                      border: Border.all(
+                          color: indexCategory == indexList[index]
+                              ? Constants.primaryColor
+                              : Colors.grey.shade300,
+                          width: 2),
                     ),
-                    itemCount: categories.length,
+                    child: Center(child: Text(categories[index])),
                   ),
                 ),
-                const SizedBox(height: 30),
-                const Text(
-                  'Products',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                separatorBuilder: (BuildContext context, int index) =>
+                    const SizedBox(
+                  width: 10,
                 ),
-                const SizedBox(height: 20),
-                FutureBuilder<Lists>(
-                    future: _productsFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return SizedBox(
-                            height: 400,
-                            child: GridView.builder(
-                              itemCount: snapshot.data?.products.length,
-                              itemBuilder: (context, index) {
-                                final product =
-                                    snapshot.data!.products[index];
-                                return GestureDetector(
-                                  onTap: () => Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                    builder: (context) => DetailsScreen(
-                                        product.id,
-                                        product.name,
-                                        product.imageUrl,
-                                        product.brandName,
-                                        product.colour,
-                                        product.colourWayId,
-                                        product.price.current.value),
-                                  )),
-                                  child: Hero(
-                                    tag: 'photo_${product.id}',
+                itemCount: categories.length,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Products',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: FutureBuilder<Lists>(
+                  future: _productsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return GridView.builder(
+                        itemCount: snapshot.data?.products.length,
+                        itemBuilder: (context, index) {
+                          final product = snapshot.data!.products[index];
+                          void openDetails() {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => DetailsScreen(
+                                  product.id,
+                                  product.name,
+                                  product.imageUrl,
+                                  product.brandName,
+                                  product.colour,
+                                  product.colourWayId,
+                                  product.price.current.value),
+                            ));
+                          }
+
+                          Future<void> addToCart() async {
+                            await CartDataProvider.instance
+                                .insert(DataBaseModel(
+                              id: product.id,
+                              name: product.name,
+                              imageUrl: product.imageUrl,
+                              colour: product.colour,
+                              colourWayId: product.colourWayId,
+                              brandName: product.brandName,
+                              price: product.price.current.value,
+                            ));
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Added to cart'),
+                                backgroundColor: Constants.secondryColor,
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          }
+
+                          Future<void> addToFavourite() async {
+                            await FavDataProvider.instance
+                                .insert(DataBaseModel(
+                              id: product.id,
+                              name: product.name,
+                              imageUrl: product.imageUrl,
+                              colour: product.colour,
+                              colourWayId: product.colourWayId,
+                              brandName: product.brandName,
+                              price: product.price.current.value,
+                            ));
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Added to favourites'),
+                                backgroundColor: Constants.primaryColor,
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          }
+
+                          return Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Constants.thirdColor,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: openDetails,
                                     child: Container(
-                                      alignment: Alignment.center,
-                                      padding: const EdgeInsets.all(10),
                                       decoration: BoxDecoration(
-                                        color: Constants.thirdColor,
+                                        color: Colors.white,
                                         borderRadius:
-                                            BorderRadius.circular(15),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.17,
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(15),
-                                              image: DecorationImage(
-                                                  image: NetworkImage(
-                                                      "https://${product.imageUrl}"),
-                                                  fit: BoxFit.contain),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Text(
-                                            product.name,
-                                            style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold),
-                                            maxLines: 1,
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment
-                                                    .spaceBetween,
-                                            children: [
-                                              Column(
-                                                children: [
-                                                  Text(
-                                                    product.brandName,
-                                                    style: const TextStyle(
-                                                        fontSize: 15,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.grey),
-                                                  ),
-                                                  Text(
-                                                    product
-                                                        .price.current.text,
-                                                    style: const TextStyle(
-                                                        fontSize: 15,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.grey),
-                                                  ),
-                                                ],
-                                              ),
-                                              Container(
-                                                height: 35,
-                                                width: 35,
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      Constants.primaryColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          5),
-                                                ),
-                                                child: Center(
-                                                  child: IconButton(
-                                                    icon: const Icon(
-                                                      Icons.add,
-                                                      size: 15,
-                                                      color: Colors.white,
-                                                    ),
-                                                    onPressed: () async {
-                                                      await CartDataProvider
-                                                          .instance
-                                                          .insert(
-                                                              DataBaseModel(
-                                                        id: product.id,
-                                                        name: product.name,
-                                                        imageUrl:
-                                                            product.imageUrl,
-                                                        colour:
-                                                            product.colour,
-                                                        colourWayId: product
-                                                            .colourWayId,
-                                                        brandName: product
-                                                            .brandName,
-                                                        price: product.price
-                                                            .current.value,
-                                                      ));
-                                                    },
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          )
-                                        ],
+                                            BorderRadius.circular(12),
+                                        image: DecorationImage(
+                                            image: NetworkImage(
+                                                "https://${product.imageUrl}"),
+                                            fit: BoxFit.contain),
                                       ),
                                     ),
                                   ),
-                                );
-                              },
-                              gridDelegate:
-                                  const SliverGridDelegateWithMaxCrossAxisExtent(
-                                      maxCrossAxisExtent: 200,
-                                      crossAxisSpacing: 20,
-                                      childAspectRatio: 3 / 4,
-                                      mainAxisSpacing: 20),
-                            ));
-                      }
-                      if (snapshot.hasError) {
-                        return Text(snapshot.error!.toString());
-                      }
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: Constants.primaryColor,
-                        ),
+                                ),
+                                const SizedBox(height: 6),
+                                GestureDetector(
+                                  onTap: openDetails,
+                                  child: Text(
+                                    product.name,
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: openDetails,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              product.brandName,
+                                              style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.grey),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              product.price.current.text,
+                                              style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.grey),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    _ProductActionButton(
+                                      color: Constants.secondryColor,
+                                      icon: Icons.favorite,
+                                      onTap: addToFavourite,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    _ProductActionButton(
+                                      color: Constants.primaryColor,
+                                      icon: Icons.add,
+                                      onTap: addToCart,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 200,
+                                crossAxisSpacing: 16,
+                                childAspectRatio: 0.7,
+                                mainAxisSpacing: 16),
                       );
-                    }),
-              ],
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text(snapshot.error!.toString()));
+                    }
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: Constants.primaryColor,
+                      ),
+                    );
+                  }),
             ),
-          ]),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProductActionButton extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+  final Future<void> Function() onTap;
+
+  const _ProductActionButton({
+    required this.color,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(5),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(5),
+        onTap: () {
+          onTap();
+        },
+        child: SizedBox(
+          height: 28,
+          width: 28,
+          child: Icon(
+            icon,
+            size: 14,
+            color: Colors.white,
+          ),
         ),
       ),
     );

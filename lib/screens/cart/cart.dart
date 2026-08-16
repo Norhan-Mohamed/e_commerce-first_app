@@ -47,199 +47,192 @@ class CartScreenState extends State<CartScreen> {
               return Center(child: Text(snapshot.error.toString()));
             }
             if (snapshot.hasData) {
+              if (snapshot.data!.isEmpty) {
+                return Center(
+                  child: Text(
+                    'Your cart is empty',
+                    style: TextStyle(color: Constants.secondryColor),
+                  ),
+                );
+              }
               return GridView.builder(
-                scrollDirection: Axis.vertical,
+                padding: const EdgeInsets.all(12),
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
                   final item = snapshot.data![index];
                   return Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Constants.thirdColor,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Constants.thirdColor,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(
+                                color: Constants.secondryColor,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              image: DecorationImage(
+                                image: NetworkImage("https://${item.imageUrl}"),
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          item.name,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13),
+                        ),
+                        Text(
+                          item.brandName,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: const TextStyle(
+                              color: Colors.black54,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 12),
+                        ),
+                        Text(
+                          "\$${item.price}",
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: const TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Container(
-                              height: 150,
-                              width: 150,
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Constants.secondryColor,
-                                    width: 3,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(15.0))),
-                              child: Image.network(
-                                "https://${item.imageUrl}",
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Text(
-                              item.name,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              softWrap: false,
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 2.0),
-                              child: Text(
-                                "Brand name: ${item.brandName}",
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                softWrap: false,
-                                style: const TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 15),
-                              ),
-                            ),
-                            Text(
-                              "price \$${item.price}",
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              softWrap: false,
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 15),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  height: 35,
-                                  width: 35,
-                                  decoration: BoxDecoration(
-                                    color: Constants.primaryColor,
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  child: Center(
-                                    child: IconButton(
-                                      icon: const Icon(
-                                        Icons.favorite,
-                                        size: 15,
-                                        color: Colors.white,
-                                      ),
-                                      onPressed: () async {
-                                        await FavDataProvider.instance
-                                            .insert(DataBaseModel(
-                                          id: item.id,
-                                          name: item.name,
-                                          imageUrl: item.imageUrl,
-                                          colour: item.colour,
-                                          colourWayId: item.colourWayId,
-                                          brandName: item.brandName,
-                                          price: item.price,
-                                        ));
-                                      },
-                                    ),
+                            Material(
+                              color: Constants.primaryColor,
+                              borderRadius: BorderRadius.circular(5),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(5),
+                                onTap: () async {
+                                  await FavDataProvider.instance
+                                      .insert(DataBaseModel(
+                                    id: item.id,
+                                    name: item.name,
+                                    imageUrl: item.imageUrl,
+                                    colour: item.colour,
+                                    colourWayId: item.colourWayId,
+                                    brandName: item.brandName,
+                                    price: item.price,
+                                  ));
+                                },
+                                child: const SizedBox(
+                                  height: 28,
+                                  width: 28,
+                                  child: Icon(
+                                    Icons.favorite,
+                                    size: 14,
+                                    color: Colors.white,
                                   ),
                                 ),
-                                Container(
-                                  height: 35,
-                                  width: 35,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      color: Constants.secondryColor),
-                                  child: IconButton(
-                                      onPressed: () async {
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                title: Text(
-                                                  'Do You Want To Delete This Item ?',
-                                                  style: TextStyle(
-                                                    color:
-                                                        Constants.secondryColor,
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Material(
+                              color: Constants.secondryColor,
+                              borderRadius: BorderRadius.circular(5),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(5),
+                                onTap: () async {
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text(
+                                            'Do You Want To Delete This Item ?',
+                                            style: TextStyle(
+                                              color: Constants.secondryColor,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          actions: [
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                  shape: const StadiumBorder(),
+                                                  foregroundColor:
+                                                      Constants.primaryColor,
+                                                  backgroundColor:
+                                                      Constants.secondryColor),
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text(
+                                                'Cancel',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 20,
                                                 ),
-                                                actions: [
-                                                  ElevatedButton(
-                                                    style: ElevatedButton.styleFrom(
-                                                        shape:
-                                                            const StadiumBorder(),
-                                                        foregroundColor:
-                                                            Constants
-                                                                .primaryColor,
-                                                        backgroundColor:
-                                                            Constants
-                                                                .secondryColor),
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child: const Text(
-                                                      'Cancel',
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 20,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  ElevatedButton(
-                                                    style: ElevatedButton.styleFrom(
-                                                        shape:
-                                                            const StadiumBorder(),
-                                                        foregroundColor:
-                                                            Constants
-                                                                .primaryColor,
-                                                        backgroundColor:
-                                                            Constants
-                                                                .primaryColor),
-                                                    onPressed: () async {
-                                                      await CartDataProvider
-                                                          .instance
-                                                          .delete(item.id!
-                                                              .toInt());
-                                                      if (!context.mounted) {
-                                                        return;
-                                                      }
-                                                      Navigator.pop(context);
-                                                      _reload();
-                                                    },
-                                                    child: const Text(
-                                                      'Yes',
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 20,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              );
-                                            });
-                                      },
-                                      icon: const Icon(
-                                        Icons.delete,
-                                        color: Colors.white,
-                                        size: 20,
-                                      )),
+                                              ),
+                                            ),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                  shape: const StadiumBorder(),
+                                                  foregroundColor:
+                                                      Constants.primaryColor,
+                                                  backgroundColor:
+                                                      Constants.primaryColor),
+                                              onPressed: () async {
+                                                await CartDataProvider.instance
+                                                    .delete(item.id!.toInt());
+                                                if (!context.mounted) {
+                                                  return;
+                                                }
+                                                Navigator.pop(context);
+                                                _reload();
+                                              },
+                                              child: const Text(
+                                                'Yes',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 20,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      });
+                                },
+                                child: const SizedBox(
+                                  height: 28,
+                                  width: 28,
+                                  child: Icon(
+                                    Icons.delete,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
                                 ),
-                              ],
+                              ),
                             ),
                           ],
                         ),
-                      ));
+                      ],
+                    ),
+                  );
                 },
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 250,
-                    crossAxisSpacing: 20,
-                    childAspectRatio: 3 / 4,
-                    mainAxisSpacing: 20),
+                    maxCrossAxisExtent: 220,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 0.68,
+                    mainAxisSpacing: 12),
               );
             }
             return Center(

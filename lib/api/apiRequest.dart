@@ -5,25 +5,13 @@ import 'package:http/http.dart' as http;
 
 import 'lists.dart';
 
-const String _rapidApiKey = String.fromEnvironment('RAPIDAPI_KEY');
-
-void _ensureApiKey() {
-  if (_rapidApiKey.isEmpty) {
-    throw StateError(
-      'Missing RAPIDAPI_KEY. Run with '
-      '--dart-define=RAPIDAPI_KEY=your_key',
-    );
-  }
-}
-
-Map<String, String> get _rapidApiHeaders => {
-      'X-RapidAPI-Key': _rapidApiKey,
-      'X-RapidAPI-Host': 'asos2.p.rapidapi.com',
-    };
+const Map<String, String> _rapidApiHeaders = {
+  'X-RapidAPI-Key': '91d5486736msh4da31749cd7f79ap1ec77ejsne9a732c8faea',
+  'X-RapidAPI-Host': 'asos2.p.rapidapi.com',
+};
 
 class Api {
   Future<Lists> ApiData(int category) async {
-    _ensureApiKey();
     final response = await http.get(
         Uri.https("asos2.p.rapidapi.com", "/products/v2/list", {
           "store": 'US',
@@ -49,7 +37,6 @@ class Api {
 
 class ApiInfo {
   Future<Details> ApiDetails(int id) async {
-    _ensureApiKey();
     final response = await http.get(
         Uri.https("asos2.p.rapidapi.com", "/products/v3/detail", {
           "id": '$id',
