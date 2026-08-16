@@ -2,32 +2,59 @@ import 'package:e_commerce/api/details.dart';
 import 'package:flutter/material.dart';
 
 import '../../api/apiRequest.dart';
+import '../../network/cartDatabase.dart';
+import '../../network/dataBaseModel.dart';
 import '../constant.dart';
 
 class DetailsScreen extends StatefulWidget {
-  late int id;
-  late String name;
-  late String imageUrl;
-  late String colour;
-  late int colourWayId;
-  late String brandName;
-  late num price;
+  final int id;
+  final String name;
+  final String imageUrl;
+  final String colour;
+  final int colourWayId;
+  final String brandName;
+  final num price;
 
-  DetailsScreen(
+  const DetailsScreen(
     this.id,
     this.name,
     this.imageUrl,
     this.brandName,
     this.colour,
     this.colourWayId,
-    this.price,
-  );
+    this.price, {
+    super.key,
+  });
 
   @override
   State<DetailsScreen> createState() => _DetailsScreenState();
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
+  late Future<Details> _detailsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _detailsFuture = ApiInfo().ApiDetails(widget.id);
+  }
+
+  Future<void> _addToCart() async {
+    await CartDataProvider.instance.insert(DataBaseModel(
+      id: widget.id,
+      name: widget.name,
+      imageUrl: widget.imageUrl,
+      colour: widget.colour,
+      colourWayId: widget.colourWayId,
+      brandName: widget.brandName,
+      price: widget.price.toDouble(),
+    ));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Added to cart')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,17 +72,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
         ),
       ),
       body: Hero(
-        tag: 'photo',
+        tag: 'photo_${widget.id}',
         child: SingleChildScrollView(
           child: FutureBuilder<Details>(
-              future: ApiInfo().ApiDetails(widget.id),
+              future: _detailsFuture,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  print(snapshot.error.toString());
+                  return Center(child: Text(snapshot.error.toString()));
                 }
                 if (snapshot.hasData) {
-                  return Container(
-                      child: Column(
+                  return Column(
                     children: [
                       Container(
                         width: MediaQuery.of(context).size.width,
@@ -66,14 +92,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           width: 3,
                         )),
                         child: Image.network(
-                          "http://" + widget.imageUrl,
+                          "https://${widget.imageUrl}",
                           fit: BoxFit.fill,
                         ),
                       ),
                       Container(
                         height: 800,
                         alignment: Alignment.center,
-                        padding: EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: Constants.thirdColor,
                         ),
@@ -87,7 +113,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 color: Constants.fourthColor,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 5,
                             ),
                             Divider(
@@ -98,9 +124,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Text(
+                                const Text(
                                   "Price",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
                                   ),
@@ -141,33 +167,33 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 ),
                                 Text(
                                   widget.brandName,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 5,
                             ),
                             Row(
                               children: [
                                 Text(
-                                  'Colour :' + widget.colour,
-                                  style: TextStyle(
+                                  'Colour :${widget.colour}',
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 5,
                             ),
                             Row(
                               children: [
-                                Text(
+                                const Text(
                                   "gender: ",
                                   style: TextStyle(
                                     fontWeight: FontWeight.w500,
@@ -176,19 +202,19 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 ),
                                 Text(
                                   snapshot.data!.gender,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 5,
                             ),
                             Row(
                               children: [
-                                Text(
+                                const Text(
                                   "Is in Stock: ",
                                   style: TextStyle(
                                     fontWeight: FontWeight.w500,
@@ -197,14 +223,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 ),
                                 Text(
                                   snapshot.data!.isInStock.toString(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                   ),
                                 )
                               ],
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 5,
                             ),
                             Column(
@@ -218,19 +244,19 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                     color: Constants.fourthColor,
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 2,
                                 ),
                                 Text(
                                   snapshot.data!.description,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 5,
                             ),
                             Divider(
@@ -238,7 +264,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               thickness: 1,
                               color: Constants.secondryColor,
                             ),
-                            Row(
+                            const Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
@@ -272,27 +298,30 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 Container(
                                   height: 50,
                                   width: 150,
-                                  child: Center(
-                                      child: Text(
-                                    "Buy Now",
-                                    style: TextStyle(color: Colors.white),
-                                  )),
+                                  alignment: Alignment.center,
                                   decoration: BoxDecoration(
                                     color: Constants.primaryColor,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                ),
-                                Container(
-                                  height: 50,
-                                  width: 150,
-                                  child: Center(
-                                      child: Text(
-                                    "Add To Cart",
+                                  child: const Text(
+                                    "Buy Now",
                                     style: TextStyle(color: Colors.white),
-                                  )),
-                                  decoration: BoxDecoration(
-                                    color: Constants.secondryColor,
-                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: _addToCart,
+                                  child: Container(
+                                    height: 50,
+                                    width: 150,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: Constants.secondryColor,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Text(
+                                      "Add To Cart",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -301,13 +330,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         ),
                       ),
                     ],
-                  ));
+                  );
                 }
-                return Center(
-                    child: Container(
-                  child: CircularProgressIndicator(),
+                return const Center(
+                    child: SizedBox(
                   height: 100,
                   width: 100,
+                  child: CircularProgressIndicator(),
                 ));
               }),
         ),

@@ -2,13 +2,7 @@ import 'package:e_commerce/network/dataBaseModel.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-final String columnname = 'name';
-final String columnid = 'id';
-final String columnimageUrl = 'imageUrl';
-final String columncolour = 'colour';
-final String columncolourWayId = 'colourWayId';
-final String columnbrandName = 'brandName';
-final String columnprice = 'price';
+const String _favTable = 'FavTable';
 
 class FavDataProvider {
   late Database db;
@@ -21,11 +15,11 @@ class FavDataProvider {
   FavDataProvider._internal();
 
   Future open() async {
-    db = await openDatabase(join(await getDatabasesPath(), 'product.db'),
+    db = await openDatabase(join(await getDatabasesPath(), 'fav.db'),
         version: 1, onCreate: (Database db, int version) async {
       await db.execute('''
-create table ProductTable ( 
-$columnid integer ,
+create table $_favTable ( 
+$columnid integer primary key,
 $columnname text not null,
 $columnimageUrl text ,
 $columncolour text ,
@@ -39,27 +33,30 @@ $columnprice real
   }
 
   Future<List<DataBaseModel>> getData() async {
-    List<Map<String, dynamic>> maps = await db.query('ProductTable');
-    if (maps.isEmpty)
+    List<Map<String, dynamic>> maps = await db.query(_favTable);
+    if (maps.isEmpty) {
       return [];
-    else {
+    } else {
       List<DataBaseModel> favproducts = [];
-      maps.forEach((element) {
-        favproducts.add(DataBaseModel.fromMap(element as Map<String, dynamic>));
-      });
-      print(maps);
+      for (final element in maps) {
+        favproducts.add(DataBaseModel.fromMap(element));
+      }
       return favproducts;
     }
   }
 
   Future<DataBaseModel> insert(DataBaseModel dataBaseModel) async {
-    dataBaseModel.id = await db.insert('ProductTable', dataBaseModel.toMap());
+    await db.insert(
+      _favTable,
+      dataBaseModel.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
     return dataBaseModel;
   }
 
   Future<int> delete(int id) async {
     return await db
-        .delete('ProductTable', where: '$columnid = ?', whereArgs: [id]);
+        .delete(_favTable, where: '$columnid = ?', whereArgs: [id]);
   }
 
   Future close() async => db.close();

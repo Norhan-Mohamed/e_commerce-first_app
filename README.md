@@ -1,16 +1,39 @@
-# e_commerce
+# E-Commerce Flutter App
 
-A new Flutter project.
+A Flutter fashion shopping demo that browses ASOS product categories via RapidAPI, shows product details, and stores cart and favourites locally with SQLite.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Splash, login, and register screens (UI demo — no backend authentication)
+- Home product grid with category filters
+- Product details from the ASOS detail API
+- Local cart and favourites (separate SQLite databases)
+- Bottom navigation: Home / Cart / Favourites
 
-A few resources to get you started if this is your first Flutter project:
+## Tech stack
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Flutter / Dart
+- `http` for REST API calls (ASOS RapidAPI)
+- `sqflite` for local cart and favourites storage
+- StatefulWidget + FutureBuilder for UI state
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Setup
+
+1. Get an API key from [RapidAPI – ASOS](https://rapidapi.com/apidojo/api/asos2).
+2. Install dependencies:
+
+```bash
+flutter pub get
+```
+
+3. Run the app with your key (do not commit the key):
+
+```bash
+flutter run --dart-define=RAPIDAPI_KEY=your_key_here
+```
+
+## Notes
+
+- Login/register only validate form fields and navigate; they do not authenticate against a server.
+- Cart and favourites are stored on-device in `cart.db` and `fav.db`.
+- If you previously ran an older build that used a shared `product.db`, that data is not migrated; new DBs are created automatically.

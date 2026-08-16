@@ -5,10 +5,25 @@ import 'package:flutter/material.dart';
 import '../../network/favDatabase.dart';
 
 class FavouriteScreen extends StatefulWidget {
+  @override
   State<FavouriteScreen> createState() => FavouriteScreenState();
 }
 
 class FavouriteScreenState extends State<FavouriteScreen> {
+  late Future<List<DataBaseModel>> _favFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _favFuture = FavDataProvider.instance.getData();
+  }
+
+  void _reload() {
+    setState(() {
+      _favFuture = FavDataProvider.instance.getData();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,10 +40,10 @@ class FavouriteScreenState extends State<FavouriteScreen> {
         ),
       ),
       body: FutureBuilder<List<DataBaseModel>>(
-          future: FavDataProvider.instance.getData(),
+          future: _favFuture,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              print(snapshot.error.toString());
+              return Center(child: Text(snapshot.error.toString()));
             }
             if (snapshot.hasData) {
               return ListView.separated(
@@ -39,7 +54,7 @@ class FavouriteScreenState extends State<FavouriteScreen> {
                   scrollDirection: Axis.vertical,
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
-                    print(snapshot.data![index].name);
+                    final item = snapshot.data![index];
                     return Container(
                         color: Constants.thirdColor,
                         padding: const EdgeInsets.all(5),
@@ -56,17 +71,17 @@ class FavouriteScreenState extends State<FavouriteScreen> {
                                       color: Constants.primaryColor,
                                       width: 3,
                                     ),
-                                    borderRadius: BorderRadius.all(
+                                    borderRadius: const BorderRadius.all(
                                         Radius.circular(15.0))),
                                 child: Image.network(
-                                  "http://${snapshot.data![index].imageUrl}",
+                                  "https://${item.imageUrl}",
                                   fit: BoxFit.fill,
                                 ),
                               ),
                               Flexible(
                                 child: Column(children: [
                                   Text(
-                                    snapshot.data![index].name,
+                                    item.name,
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
                                     softWrap: false,
@@ -76,11 +91,11 @@ class FavouriteScreenState extends State<FavouriteScreen> {
                                         fontSize: 13),
                                   ),
                                   Text(
-                                    snapshot.data![index].brandName,
+                                    item.brandName,
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
                                     softWrap: false,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         color: Colors.black,
                                         fontWeight: FontWeight.w400,
                                         fontSize: 15),
@@ -131,12 +146,12 @@ class FavouriteScreenState extends State<FavouriteScreen> {
                                                         Constants.primaryColor),
                                                 onPressed: () async {
                                                   await FavDataProvider.instance
-                                                      .delete(snapshot.data!
-                                                          .elementAt(index)
-                                                          .id!
-                                                          .toInt());
+                                                      .delete(item.id!.toInt());
+                                                  if (!context.mounted) {
+                                                    return;
+                                                  }
                                                   Navigator.pop(context);
-                                                  setState(() {});
+                                                  _reload();
                                                 },
                                                 child: const Text(
                                                   'Yes',
@@ -161,12 +176,12 @@ class FavouriteScreenState extends State<FavouriteScreen> {
                   });
             }
             return Center(
-              child: Container(
+              child: SizedBox(
+                height: 100,
+                width: 100,
                 child: CircularProgressIndicator(
                   color: Constants.primaryColor,
                 ),
-                height: 100,
-                width: 100,
               ),
             );
           }),

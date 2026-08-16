@@ -1,4 +1,10 @@
-import 'package:e_commerce/network/cartDatabase.dart';
+const String columnname = 'name';
+const String columnid = 'id';
+const String columnimageUrl = 'imageUrl';
+const String columncolour = 'colour';
+const String columncolourWayId = 'colourWayId';
+const String columnbrandName = 'brandName';
+const String columnprice = 'price';
 
 class DataBaseModel {
   int? id;
@@ -21,31 +27,30 @@ class DataBaseModel {
 
   DataBaseModel.fromMap(Map<String, dynamic> map) {
     if (map[columnid] != null) {
-      this.id = map[columnid];
+      id = map[columnid];
     }
-    this.name = map[columnname];
-    print('10');
-    this.colour = map[columncolour];
-    this.imageUrl = map[columnimageUrl];
-    this.brandName = map[columnbrandName];
-    print('20');
-    this.price = map[columnprice];
-    print("9");
-    this.colourWayId = int.parse(map[columncolourWayId]);
-    print('30');
+    name = map[columnname];
+    colour = map[columncolour];
+    imageUrl = map[columnimageUrl];
+    brandName = map[columnbrandName];
+    price = map[columnprice] is int
+        ? (map[columnprice] as int).toDouble()
+        : map[columnprice];
+    colourWayId = int.parse(map[columncolourWayId].toString());
   }
+
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = {};
-    if (this.id != null) {
-      map[columnid] = this.id;
+    if (id != null) {
+      map[columnid] = id;
     }
 
-    map[columnname] = this.name;
-    map[columncolour] = this.colour;
-    map[columnimageUrl] = this.imageUrl;
-    map[columnbrandName] = this.brandName;
-    map[columncolourWayId] = this.colourWayId;
-    map[columnprice] = this.price;
+    map[columnname] = name;
+    map[columncolour] = colour;
+    map[columnimageUrl] = imageUrl;
+    map[columnbrandName] = brandName;
+    map[columncolourWayId] = colourWayId;
+    map[columnprice] = price;
 
     return map;
   }

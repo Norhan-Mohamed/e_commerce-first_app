@@ -3,13 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 import 'dataBaseModel.dart';
 
-final String columnname = 'name';
-final String columnid = 'id';
-final String columnimageUrl = 'imageUrl';
-final String columncolour = 'colour';
-final String columncolourWayId = 'colourWayId';
-final String columnbrandName = 'brandName';
-final String columnprice = 'price';
+const String _cartTable = 'CartTable';
 
 class CartDataProvider {
   late Database db;
@@ -21,11 +15,11 @@ class CartDataProvider {
   CartDataProvider._internal();
 
   Future open() async {
-    db = await openDatabase(join(await getDatabasesPath(), 'product.db'),
+    db = await openDatabase(join(await getDatabasesPath(), 'cart.db'),
         version: 1, onCreate: (Database db, int version) async {
       await db.execute('''
-create table ProductTable ( 
-  $columnid integer ,
+create table $_cartTable ( 
+  $columnid integer primary key,
   $columnname text ,
   $columnimageUrl text ,
   $columncolour text ,
@@ -39,27 +33,30 @@ $columnprice real
   }
 
   Future<List<DataBaseModel>> getData() async {
-    List<Map<String, dynamic>> maps = await db.query('ProductTable');
-    if (maps.isEmpty)
+    List<Map<String, dynamic>> maps = await db.query(_cartTable);
+    if (maps.isEmpty) {
       return [];
-    else {
+    } else {
       List<DataBaseModel> products = [];
-      maps.forEach((element) {
-        products.add(DataBaseModel.fromMap(element as Map<String, dynamic>));
-      });
-      print(maps);
+      for (final element in maps) {
+        products.add(DataBaseModel.fromMap(element));
+      }
       return products;
     }
   }
 
   Future<DataBaseModel> insert(DataBaseModel dataBaseModel) async {
-    dataBaseModel.id = await db.insert('ProductTable', dataBaseModel.toMap());
+    await db.insert(
+      _cartTable,
+      dataBaseModel.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
     return dataBaseModel;
   }
 
   Future<int> delete(int id) async {
     return await db
-        .delete('ProductTable', where: '$columnid = ?', whereArgs: [id]);
+        .delete(_cartTable, where: '$columnid = ?', whereArgs: [id]);
   }
 
   Future close() async => db.close();

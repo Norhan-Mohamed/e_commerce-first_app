@@ -7,11 +7,10 @@ import 'package:e_commerce/screens/favourite/favourite.dart';
 import 'package:e_commerce/screens/splashScreen.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  FavDataProvider.instance.open();
-  WidgetsFlutterBinding.ensureInitialized();
-  CartDataProvider.instance.open();
+  await FavDataProvider.instance.open();
+  await CartDataProvider.instance.open();
   runApp(const MyApp());
 }
 
@@ -20,15 +19,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const Splash(),
+      home: Splash(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({
+  const MyHomePage({
     super.key,
   });
 
@@ -37,13 +36,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<Map<String, dynamic>> _pages = [
+  final List<Map<String, dynamic>> _pages = [
     {'page': Home(), 'title': 'Home'},
     {'page': CartScreen(), 'title': 'Cart'},
     {'page': FavouriteScreen(), 'title': 'Favourite'},
   ];
   int _selectedPageIndex = 0;
-  Index(int index) {
+
+  void index(int index) {
     setState(() {
       _selectedPageIndex = index;
     });
@@ -60,9 +60,9 @@ class _MyHomePageState extends State<MyHomePage> {
         selectedItemColor: Constants.primaryColor,
         unselectedItemColor: Colors.grey,
         currentIndex: _selectedPageIndex,
-        onTap: Index,
+        onTap: index,
         type: BottomNavigationBarType.fixed,
-        items: [
+        items: const [
           BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined), label: 'Home'),
           BottomNavigationBarItem(

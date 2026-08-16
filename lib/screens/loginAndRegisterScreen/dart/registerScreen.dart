@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 
 class RegisterScreen extends StatelessWidget {
-  RegisterScreen({Key? key}) : super(key: key);
+  RegisterScreen({super.key});
 
   final formKey = GlobalKey<FormState>();
-  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      key: scaffoldKey,
       body: Center(
-        child: Column(children: [
+        child: SingleChildScrollView(
+          child: Column(children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -26,10 +25,10 @@ class RegisterScreen extends StatelessWidget {
             color: Colors.white,
             child: Column(
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 60,
                 ),
-                Text(
+                const Text(
                   "SIGN UP",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -45,7 +44,8 @@ class RegisterScreen extends StatelessWidget {
                       children: [
                         TextFormField(
                           autofocus: true,
-                          decoration: InputDecoration(hintText: ' Email '),
+                          decoration:
+                              const InputDecoration(hintText: ' Email '),
                           validator: (value) {
                             if (value!.isEmpty) {
                               return "Email required";
@@ -53,11 +53,13 @@ class RegisterScreen extends StatelessWidget {
                             return null;
                           },
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 30,
                         ),
                         TextFormField(
-                          decoration: InputDecoration(hintText: 'Password'),
+                          obscureText: true,
+                          decoration:
+                              const InputDecoration(hintText: 'Password'),
                           validator: (value) {
                             if (value!.isEmpty) {
                               return "Password required";
@@ -65,12 +67,13 @@ class RegisterScreen extends StatelessWidget {
                             return null;
                           },
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 20,
                         ),
                         TextFormField(
-                          decoration:
-                              InputDecoration(hintText: 'Confirm Password'),
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                              hintText: 'Confirm Password'),
                           validator: (value) {
                             if (value!.isEmpty) {
                               return "Password required";
@@ -78,22 +81,30 @@ class RegisterScreen extends StatelessWidget {
                             return null;
                           },
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 20,
                         ),
                         ElevatedButton(
-                          child: Text(
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Account created')),
+                              );
+                              Navigator.pop(context);
+                            }
+                          },
+                          style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all<Color>(
+                            const Color(0xff3fedbd),
+                          )),
+                          child: const Text(
                             "sign up",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
                             ),
                           ),
-                          onPressed: () {},
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                            Color(0xff3fedbd),
-                          )),
                         ),
                       ],
                     ),
@@ -102,21 +113,21 @@ class RegisterScreen extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 30,
           ),
-          Container(
+          SizedBox(
             height: 50,
             width: 300,
             child: ElevatedButton(
               style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                Color(0xff3fedbd),
+                  backgroundColor: WidgetStateProperty.all<Color>(
+                const Color(0xff3fedbd),
               )),
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Center(
+              child: const Center(
                 heightFactor: 2.9,
                 child: Text(
                   "Log in",
@@ -129,6 +140,7 @@ class RegisterScreen extends StatelessWidget {
             ),
           ),
         ]),
+        ),
       ),
     );
   }

@@ -6,11 +6,25 @@ import '../../network/cartDatabase.dart';
 import '../../network/favDatabase.dart';
 
 class CartScreen extends StatefulWidget {
+  @override
   State<CartScreen> createState() => CartScreenState();
 }
 
 class CartScreenState extends State<CartScreen> {
-  int counter = 0;
+  late Future<List<DataBaseModel>> _cartFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _cartFuture = CartDataProvider.instance.getData();
+  }
+
+  void _reload() {
+    setState(() {
+      _cartFuture = CartDataProvider.instance.getData();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,17 +41,17 @@ class CartScreenState extends State<CartScreen> {
         ),
       ),
       body: FutureBuilder<List<DataBaseModel>>(
-          future: CartDataProvider.instance.getData(),
+          future: _cartFuture,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              print(snapshot.error.toString());
+              return Center(child: Text(snapshot.error.toString()));
             }
             if (snapshot.hasData) {
               return GridView.builder(
                 scrollDirection: Axis.vertical,
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
-                  print(snapshot.data![index].name);
+                  final item = snapshot.data![index];
                   return Container(
                       alignment: Alignment.center,
                       padding: const EdgeInsets.all(10),
@@ -60,15 +74,15 @@ class CartScreenState extends State<CartScreen> {
                                   borderRadius: const BorderRadius.all(
                                       Radius.circular(15.0))),
                               child: Image.network(
-                                "http://${snapshot.data![index].imageUrl}",
+                                "https://${item.imageUrl}",
                                 fit: BoxFit.fill,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 10,
                             ),
                             Text(
-                              snapshot.data![index].name,
+                              item.name,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                               softWrap: false,
@@ -80,24 +94,22 @@ class CartScreenState extends State<CartScreen> {
                             Padding(
                               padding: const EdgeInsets.only(top: 2.0),
                               child: Text(
-                                "Brand name: " +
-                                    snapshot.data![index].brandName,
+                                "Brand name: ${item.brandName}",
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
                                 softWrap: false,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.w400,
                                     fontSize: 15),
                               ),
                             ),
                             Text(
-                              "price \$" +
-                                  snapshot.data![index].price.toString(),
+                              "price \$${item.price}",
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                               softWrap: false,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.w400,
                                   fontSize: 15),
@@ -106,75 +118,6 @@ class CartScreenState extends State<CartScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Container(
-                                  height: 20,
-                                  width: 20,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  child: Center(
-                                    child: Center(
-                                      child: IconButton(
-                                        icon: Icon(
-                                          Icons.minimize,
-                                          size: 15,
-                                          color: Colors.black,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            counter--;
-                                            if (counter <= 1) {
-                                              counter = 1;
-                                            }
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Container(
-                                  height: 30,
-                                  width: 30,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      border: Border.all(
-                                        color: Constants.secondryColor,
-                                        width: 1,
-                                      )),
-                                  child: Center(
-                                    child: Text(counter.toString()),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Container(
-                                  height: 20,
-                                  width: 20,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  child: Center(
-                                    child: IconButton(
-                                      icon: Icon(
-                                        Icons.add,
-                                        size: 15,
-                                        color: Colors.black,
-                                      ),
-                                      onPressed: () {
-                                        setState(() {
-                                          counter++;
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 15,
-                                ),
                                 Container(
                                   height: 35,
                                   width: 35,
@@ -192,16 +135,13 @@ class CartScreenState extends State<CartScreen> {
                                       onPressed: () async {
                                         await FavDataProvider.instance
                                             .insert(DataBaseModel(
-                                          id: snapshot.data![index].id,
-                                          name: snapshot.data![index].name,
-                                          imageUrl:
-                                              snapshot.data![index].imageUrl,
-                                          colour: snapshot.data![index].colour,
-                                          colourWayId:
-                                              snapshot.data![index].colourWayId,
-                                          brandName:
-                                              snapshot.data![index].brandName,
-                                          price: snapshot.data![index].price,
+                                          id: item.id,
+                                          name: item.name,
+                                          imageUrl: item.imageUrl,
+                                          colour: item.colour,
+                                          colourWayId: item.colourWayId,
+                                          brandName: item.brandName,
+                                          price: item.price,
                                         ));
                                       },
                                     ),
@@ -210,6 +150,9 @@ class CartScreenState extends State<CartScreen> {
                                 Container(
                                   height: 35,
                                   width: 35,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      color: Constants.secondryColor),
                                   child: IconButton(
                                       onPressed: () async {
                                         showDialog(
@@ -260,12 +203,13 @@ class CartScreenState extends State<CartScreen> {
                                                     onPressed: () async {
                                                       await CartDataProvider
                                                           .instance
-                                                          .delete(snapshot.data!
-                                                              .elementAt(index)
-                                                              .id!
+                                                          .delete(item.id!
                                                               .toInt());
+                                                      if (!context.mounted) {
+                                                        return;
+                                                      }
                                                       Navigator.pop(context);
-                                                      setState(() {});
+                                                      _reload();
                                                     },
                                                     child: const Text(
                                                       'Yes',
@@ -279,14 +223,11 @@ class CartScreenState extends State<CartScreen> {
                                               );
                                             });
                                       },
-                                      icon: Icon(
+                                      icon: const Icon(
                                         Icons.delete,
                                         color: Colors.white,
                                         size: 20,
                                       )),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      color: Constants.secondryColor),
                                 ),
                               ],
                             ),
@@ -294,7 +235,7 @@ class CartScreenState extends State<CartScreen> {
                         ),
                       ));
                 },
-                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 250,
                     crossAxisSpacing: 20,
                     childAspectRatio: 3 / 4,
@@ -302,12 +243,12 @@ class CartScreenState extends State<CartScreen> {
               );
             }
             return Center(
-              child: Container(
+              child: SizedBox(
+                height: 100,
+                width: 100,
                 child: CircularProgressIndicator(
                   color: Constants.primaryColor,
                 ),
-                height: 100,
-                width: 100,
               ),
             );
           }),

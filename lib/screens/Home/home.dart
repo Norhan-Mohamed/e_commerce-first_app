@@ -18,6 +18,27 @@ class HomeState extends State<Home> {
   List categoriesId = [4208, 4209, 4210, 3136];
   late String category = '';
   int initial = 4208;
+  late Future<Lists> _productsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _productsFuture = Api().ApiData(initial);
+  }
+
+  void _selectCategory(int index) {
+    setState(() {
+      initial = categoriesId[index];
+      indexCategory = indexList[index];
+      category = [
+        "jeans",
+        "shoes, Boots & Sneakers",
+        "jewelery",
+        "shirts",
+      ][index];
+      _productsFuture = Api().ApiData(initial);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,13 +148,7 @@ class HomeState extends State<Home> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (context, index) => InkWell(
-                      onTap: () {
-                        setState(() {
-                          initial = categoriesId[index];
-                          indexCategory = indexList[index];
-                          category = categories[index];
-                        });
-                      },
+                      onTap: () => _selectCategory(index),
                       child: Container(
                         padding: const EdgeInsets.all(3),
                         decoration: BoxDecoration(
@@ -162,179 +177,142 @@ class HomeState extends State<Home> {
                 ),
                 const SizedBox(height: 20),
                 FutureBuilder<Lists>(
-                    future: Api().ApiData(initial),
+                    future: _productsFuture,
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        return Container(
+                        return SizedBox(
                             height: 400,
                             child: GridView.builder(
                               itemCount: snapshot.data?.products.length,
                               itemBuilder: (context, index) {
-                                void selectCategory(BuildContext ctx) {
-                                  Navigator.of(ctx).pushNamed('details',
-                                      arguments: {'category': category});
-                                }
-
-                                return InkWell(
-                                    onTap: () => selectCategory(context),
-                                    child: GestureDetector(
-                                      onTap: () => Navigator.of(context)
-                                          .push(MaterialPageRoute(
-                                        builder: (context) => DetailsScreen(
-                                            snapshot.data!.products[index].id,
-                                            snapshot.data!.products[index].name,
-                                            snapshot
-                                                .data!.products[index].imageUrl,
-                                            snapshot.data!.products[index]
-                                                .brandName,
-                                            snapshot
-                                                .data!.products[index].colour,
-                                            snapshot.data!.products[index]
-                                                .colourWayId,
-                                            snapshot.data!.products[index].price
-                                                .current.value),
-                                      )),
-                                      child: Hero(
-                                        tag: 'photo$index',
-                                        child: Container(
-                                          alignment: Alignment.center,
-                                          padding: const EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            color: Constants.thirdColor,
-                                            borderRadius:
-                                                BorderRadius.circular(15),
-                                          ),
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Container(
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.17, //145,
-                                                width: MediaQuery.of(context)
+                                final product =
+                                    snapshot.data!.products[index];
+                                return GestureDetector(
+                                  onTap: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                    builder: (context) => DetailsScreen(
+                                        product.id,
+                                        product.name,
+                                        product.imageUrl,
+                                        product.brandName,
+                                        product.colour,
+                                        product.colourWayId,
+                                        product.price.current.value),
+                                  )),
+                                  child: Hero(
+                                    tag: 'photo_${product.id}',
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Constants.thirdColor,
+                                        borderRadius:
+                                            BorderRadius.circular(15),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Container(
+                                            height: MediaQuery.of(context)
                                                     .size
-                                                    .width,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.circular(15),
-                                                  image: DecorationImage(
-                                                      image: NetworkImage(
-                                                          "http://${snapshot.data!.products[index].imageUrl}"),
-                                                      fit: BoxFit.contain),
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              Text(
-                                                snapshot
-                                                    .data!.products[index].name,
-                                                style: const TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                                maxLines: 1,
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                                    .height *
+                                                0.17,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
+                                              image: DecorationImage(
+                                                  image: NetworkImage(
+                                                      "https://${product.imageUrl}"),
+                                                  fit: BoxFit.contain),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Text(
+                                            product.name,
+                                            style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold),
+                                            maxLines: 1,
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment
+                                                    .spaceBetween,
+                                            children: [
+                                              Column(
                                                 children: [
-                                                  Column(
-                                                    children: [
-                                                      Text(
-                                                        snapshot
-                                                            .data!
-                                                            .products[index]
-                                                            .brandName,
-                                                        style: const TextStyle(
-                                                            fontSize: 15,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: Colors.grey),
-                                                      ),
-                                                      Text(
-                                                        snapshot
-                                                            .data!
-                                                            .products[index]
-                                                            .price
-                                                            .current
-                                                            .text,
-                                                        style: const TextStyle(
-                                                            fontSize: 15,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: Colors.grey),
-                                                      ),
-                                                    ],
+                                                  Text(
+                                                    product.brandName,
+                                                    style: const TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.grey),
                                                   ),
-                                                  Container(
-                                                    height: 35,
-                                                    width: 35,
-                                                    decoration: BoxDecoration(
-                                                      color: Constants
-                                                          .primaryColor,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              5),
-                                                    ),
-                                                    child: Center(
-                                                      child: IconButton(
-                                                        icon: const Icon(
-                                                          Icons.add,
-                                                          size: 15,
-                                                          color: Colors.white,
-                                                        ),
-                                                        onPressed: () async {
-                                                          await CartDataProvider
-                                                              .instance
-                                                              .insert(
-                                                                  DataBaseModel(
-                                                            id: snapshot
-                                                                .data!
-                                                                .products[index]
-                                                                .id,
-                                                            name: snapshot
-                                                                .data!
-                                                                .products[index]
-                                                                .name,
-                                                            imageUrl: snapshot
-                                                                .data!
-                                                                .products[index]
-                                                                .imageUrl,
-                                                            colour: snapshot
-                                                                .data!
-                                                                .products[index]
-                                                                .colour,
-                                                            colourWayId: snapshot
-                                                                .data!
-                                                                .products[index]
-                                                                .colourWayId,
-                                                            brandName: snapshot
-                                                                .data!
-                                                                .products[index]
-                                                                .brandName,
-                                                            price: snapshot
-                                                                .data!
-                                                                .products[index]
-                                                                .price
-                                                                .current
-                                                                .value,
-                                                          ));
-                                                        },
-                                                      ),
-                                                    ),
-                                                  )
+                                                  Text(
+                                                    product
+                                                        .price.current.text,
+                                                    style: const TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.grey),
+                                                  ),
                                                 ],
+                                              ),
+                                              Container(
+                                                height: 35,
+                                                width: 35,
+                                                decoration: BoxDecoration(
+                                                  color:
+                                                      Constants.primaryColor,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          5),
+                                                ),
+                                                child: Center(
+                                                  child: IconButton(
+                                                    icon: const Icon(
+                                                      Icons.add,
+                                                      size: 15,
+                                                      color: Colors.white,
+                                                    ),
+                                                    onPressed: () async {
+                                                      await CartDataProvider
+                                                          .instance
+                                                          .insert(
+                                                              DataBaseModel(
+                                                        id: product.id,
+                                                        name: product.name,
+                                                        imageUrl:
+                                                            product.imageUrl,
+                                                        colour:
+                                                            product.colour,
+                                                        colourWayId: product
+                                                            .colourWayId,
+                                                        brandName: product
+                                                            .brandName,
+                                                        price: product.price
+                                                            .current.value,
+                                                      ));
+                                                    },
+                                                  ),
+                                                ),
                                               )
                                             ],
-                                          ),
-                                        ),
+                                          )
+                                        ],
                                       ),
-                                    ));
+                                    ),
+                                  ),
+                                );
                               },
                               gridDelegate:
                                   const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -345,10 +323,7 @@ class HomeState extends State<Home> {
                             ));
                       }
                       if (snapshot.hasError) {
-                        print(snapshot.error!);
-                        return Container(
-                          child: Text(snapshot.error!.toString()),
-                        );
+                        return Text(snapshot.error!.toString());
                       }
                       return Center(
                         child: CircularProgressIndicator(
@@ -362,11 +337,5 @@ class HomeState extends State<Home> {
         ),
       ),
     );
-  }
-
-  @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-    throw UnimplementedError();
   }
 }

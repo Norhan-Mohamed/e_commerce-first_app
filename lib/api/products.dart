@@ -32,37 +32,36 @@ class Product {
   });
 
   Product.fromMap(Map<String, dynamic> map) {
-    this.productType = map['productType'];
-    this.id = map['id'];
-    this.name = map['name'];
+    productType = map['productType'];
+    id = map['id'];
+    name = map['name'];
     price = Price.fromMap(map['price']);
-    this.colour = map['colour'];
-    this.url = map['url'];
-    this.brandName = map['brandName'];
-    this.colourWayId = map['colourWayId'];
-    this.hasMultiplePrices = map['hasMultiplePrices'];
-    this.hasVariantColours = map['hasVariantColours'];
-
-    this.imageUrl = map['imageUrl'];
-    this.isSellingFast = map['isSellingFast'];
-    this.productCode = map['productCode'];
+    colour = map['colour'];
+    url = map['url'];
+    brandName = map['brandName'];
+    colourWayId = map['colourWayId'];
+    hasMultiplePrices = map['hasMultiplePrices'];
+    hasVariantColours = map['hasVariantColours'];
+    imageUrl = map['imageUrl'];
+    isSellingFast = map['isSellingFast'];
+    productCode = map['productCode'];
   }
+
   Map<String, dynamic> toMap() {
-    Map<String, dynamic> map = {
-      "id": this.id,
-      "name": this.name,
-      "price ": this.price.toMap(),
-      "colour": this.colour,
-      "url": this.url,
-      "brandName": this.brandName,
-      "colourWayId": this.colourWayId,
-      "hasMultiplePrices": this.hasMultiplePrices,
-      "hasVariantColours": this.hasVariantColours,
-      "imageUrl": this.imageUrl,
-      "isSellingFast": this.isSellingFast,
-      "productCode": this.productCode,
-      "productType": this.productType,
+    return {
+      "id": id,
+      "name": name,
+      "price": price.toMap(),
+      "colour": colour,
+      "url": url,
+      "brandName": brandName,
+      "colourWayId": colourWayId,
+      "hasMultiplePrices": hasMultiplePrices,
+      "hasVariantColours": hasVariantColours,
+      "imageUrl": imageUrl,
+      "isSellingFast": isSellingFast,
+      "productCode": productCode,
+      "productType": productType,
     };
-    return map;
   }
 }
